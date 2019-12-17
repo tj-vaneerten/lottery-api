@@ -1,8 +1,20 @@
-versions: 2
+versions: 2.1
 jobs:
   build:
     docker:
       - image: circleci/node:latest
     steps:
       - checkout
-      - run: echo "building lottery api"
+      - run:
+          name: update npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install dependencies
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: test
+          command: npm test
