@@ -1,0 +1,8 @@
+versions: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run: echo "building lottery api"
