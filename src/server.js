@@ -8,7 +8,11 @@ const app = fastify({
 
 app.register(fastifyMongodb, {
 	forceClose: true,
-	url: 'mongodb://localhost:27017'
+	url: 'mongodb://localhost:27017/test'
+});
+
+app.get('/games', (request, reply) => {
+	reply.send([]);
 });
 
 const start = (opts, callback) => {

@@ -10,9 +10,7 @@
     "serve": "node ./dist/server",
     "start": "npm-run-all build serve"
   },
-  "tap": {
-    "check-coverage": true
-  },
+  "tap": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tj-vaneerten/lottery-api.git"
@@ -28,6 +26,7 @@
     "@babel/core": "^7.7.5",
     "@babel/node": "^7.7.4",
     "@babel/preset-env": "^7.7.6",
+    "mongo-clean": "^2.0.0",
     "nodemon": "^2.0.2",
     "tap": "^14.10.1"
   },
