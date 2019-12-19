@@ -1,0 +1,190 @@
+openapi: 3.0.0
+info:
+  title: Lottery API
+  description: Lottery application service
+  version: 0.0.1
+  
+paths:
+  /winners:
+    get:
+      description: Returns list of lottery winners
+      responses:
+        '200':
+          description: JSON array of winners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+
+  /games:
+    get:
+      description: Returns list of available games
+      responses:
+        '200':
+          description: JSON array of games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+
+  /games/{gameId}:
+    get:
+      description: Returns game information
+      parameters:
+        - in: path
+          name: gameId
+          schema:
+            type: string
+          required: true
+          description: Name of the game
+      responses:
+        '200':
+          description: JSON object of game
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    $ref: '#/components/schemas/Game'
+                  pastDrawings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Drawing'
+        '404':
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+                
+  /drawings/{drawingId}:
+    get:
+      description: Returns drawing information
+      parameters:
+        - in: path
+          name: drawingId
+          schema:
+            type: string
+          required: true
+          description: Id of the drawing
+      responses:
+        '200':
+          description: JSON object of drawing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  game:
+                    type: object
+                    properties:
+                      drawing:
+                        $ref: '#/components/schemas/Drawing'
+                      game:
+                        $ref: '#/components/schemas/Game'
+        '404':
+          description: Drawing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+
+  /drawings/{drawingId}/entries:
+    post:
+      description: Posts new entry for drawing
+      parameters: 
+        - in: path
+          name: drawingId
+          schema:
+            type: string
+          required: true
+          description: Id of the drawing
+      requestBody:
+        description: JSON object of entry
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entry'
+      responses:
+        '201':
+          description: Successfully posted entry
+        '400':
+          description: Invalid entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        '404':
+          description: Drawing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+        interval:
+          type: number
+        description:
+          type: string
+        lastDrawingTime:
+          type: string
+          format: date-time
+        nextDrawingTime:
+          type: string
+          format: date-time
+    Drawing:
+      type: object
+      properties:
+        id:
+          type: number
+        datetime:
+          type: string
+          format: date-time
+        game:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+        result:
+          type: object
+          properties:
+            numbers:
+              type: array
+              items:
+                type: number
+            winners:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entry'
+    Entry:
+      type: object
+      properties:
+        picks:
+          type: array
+          items:
+            type: number
+        player:
+          type: string
+        drawing:
+          type: number
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+  

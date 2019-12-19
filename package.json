@@ -4,16 +4,35 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "tap",
+    "dev": "nodemon --exec babel-node ./src/server",
+    "build": "babel src --out-dir dist",
+    "serve": "node ./dist/server",
+    "start": "npm-run-all build serve"
+  },
+  "tap": {
+    "check-coverage": true
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tj-vaneerten/lottery-api.git"
   },
-  "author": "",
+  "author": "tj-vaneerten",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tj-vaneerten/lottery-api/issues"
   },
-  "homepage": "https://github.com/tj-vaneerten/lottery-api#readme"
+  "homepage": "https://github.com/tj-vaneerten/lottery-api#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/node": "^7.7.4",
+    "@babel/preset-env": "^7.7.6",
+    "nodemon": "^2.0.2",
+    "tap": "^14.10.1"
+  },
+  "dependencies": {
+    "fastify": "^2.11.0",
+    "fastify-mongodb": "^2.0.0"
+  }
 }
