@@ -5,9 +5,7 @@ import startApp from '../src/server';
 const gamePattern = {
 	id: /^[a-zA-Z0-9_]+$/,
 	interval: Number,
-	description: String,
-	lastDrawingTime: Date,
-	nextDrawingTime: Date
+	description: String
 }
 
 startApp({
@@ -36,13 +34,29 @@ startApp({
 // --------------------------------------------------
 
 	tap.test('GET /games', t => {
-		const db = app.mongo.db;
-		const games = db.collection('games');
 
 		// insert two games and test that they return
-		games.insert([
-			{ _id: 'powerball', name: 'PowerBall', description: 'Powerball drawing', interval: 3600 },
-			{ _id: 'megamillions', name: 'Mega Millions', description: 'Mega Millions drawing', interval: 1800 }
+		Promise.all([
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'powerball',
+					name: 'PowerBall',
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			}),
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'megamillions',
+					name: 'Mega Millions',
+					description: 'Mega Millions drawing',
+					interval: 1800
+				}
+			})
 		])
 		.then(() => app.inject({
 			method: 'GET',
@@ -66,29 +80,61 @@ startApp({
 // --------------------------------------------------
 
 	tap.test('GET /games/{gameId}', t => {
-		const db = app.mongo.db;
-		const games = db.collection('games');
 
 		// insert two games and get one by id
-		games.insert([
-			{ _id: 'powerball', name: 'PowerBall', description: 'Powerball drawing', interval: 3600 },
-			{ _id: 'megamillions', name: 'Mega Millions', description: 'Mega Millions drawing', interval: 1800 }
+		Promise.all([
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'powerball',
+					name: 'PowerBall',
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			}),
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'megamillions',
+					name: 'Mega Millions',
+					description: 'Mega Millions drawing',
+					interval: 1800
+				}
+			})
 		])
-		.then(() => app.inject({
-			method: 'GET',
-			url: '/games/powerball'
-		}))
-		.then(response => {
-			t.strictEqual(response.statusCode, 200);
+		.then(() => Promise.all([
 
-			const body = JSON.parse(response.body);
-			t.type(body, Object);
-			t.hasStrict(body, {
-				game: Object,
-				pastDrawings: Array
-			});
-			t.match(body.game, gamePattern);
-		})
+			// test 200 response
+			app.inject({
+				method: 'GET',
+				url: '/games/powerball'
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 200);
+				const body = JSON.parse(response.body);
+				t.type(body, Object);
+				t.match(body, {
+					game: Object,
+					pastDrawings: Array
+				});
+				t.match(body.game, gamePattern);
+			}),
+
+			// test 404 response
+			app.inject({
+				method: 'GET',
+				url: '/games/notarealgame'
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 404);
+				const body = JSON.parse(response.body);
+				t.type(body, Object);
+				t.type(body.errors, Array);
+				t.strictEqual(body.errors.length, 1);
+			})
+		]))
 		.catch(error => t.error(error))
 		.finally(() => t.end());
 	});
