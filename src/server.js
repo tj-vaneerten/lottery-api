@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import fastifyMongodb from 'fastify-mongodb';
 import gamesRoutes from './routes/games';
+import drawingsRoutes from './routes/drawings';
 
 const app = fastify({
 	logger: true,
@@ -13,6 +14,7 @@ app.register(fastifyMongodb, {
 });
 
 app.register(gamesRoutes, { prefix: '/games' });
+app.register(drawingsRoutes, { prefix: '/drawings' });
 
 const start = (opts, callback) => {
 	app.listen(opts.port, opts.address, err => {

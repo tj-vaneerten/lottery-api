@@ -4,6 +4,7 @@ import startApp from '../src/server';
 
 const gamePattern = {
 	id: /^[a-zA-Z0-9_]+$/,
+	name: String,
 	interval: Number,
 	description: String
 }
@@ -64,11 +65,9 @@ startApp({
 		}))
 		.then(response => {
 			t.strictEqual(response.statusCode, 200);
-
 			const body = JSON.parse(response.body);
 			t.type(body, Array);
 			t.strictEqual(body.length, 2);
-
 			const game = body[0];
 			t.match(game, gamePattern);
 		})
@@ -76,6 +75,101 @@ startApp({
 		.finally(() => t.end());
 
 	});
+
+// --------------------------------------------------
+
+	tap.test('POST /games', t => {
+
+		Promise.all([
+
+			// insert valid game
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'powerball',
+					name: 'PowerBall',
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 201);
+				const body = JSON.parse(response.body);
+				t.match(body, gamePattern);
+			}),
+
+			// insert game without id
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					name: 'PowerBall',
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 400);
+				const {errors} = JSON.parse(response.body);
+				t.type(errors, Array);
+				t.strictEqual(errors.length, 1);
+				t.match(errors[0], 'id');
+			}),
+
+			// insert game without id or name
+			app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 400);
+				const {errors} = JSON.parse(response.body);
+				t.type(errors, Array);
+				t.strictEqual(errors.length, 2);
+				t.match(errors[0], 'id');
+				t.match(errors[1], 'name');
+			})
+		])
+		.then(() => {
+
+			// insert game with duplicate id
+			return app.inject({
+				method: 'POST',
+				url: '/games',
+				body: {
+					id: 'powerball',
+					name: 'PowerBall',
+					description: 'Powerball drawing',
+					interval: 3600
+				}
+			})
+			.then(response => {
+				t.strictEqual(response.statusCode, 404);
+				const {errors} = JSON.parse(response.body);
+				t.strictEqual(errors.length, 1);
+				t.match(errors[0], 'id');
+			});
+		})
+		.then(() => {
+			
+			// make sure invalid games weren't inserted
+			return app.inject({
+				method: 'GET',
+				url: '/games'
+			})
+			.then(response => {
+				const body = JSON.parse(response.body);
+				t.strictEqual(body.length, 1);
+			});
+		})
+		.catch(error => t.error(error))
+		.finally(() => t.end());
+	})
 
 // --------------------------------------------------
 

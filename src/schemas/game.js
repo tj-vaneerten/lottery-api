@@ -3,6 +3,7 @@ export default {
 	type: 'object',
 	properties: {
 		id: { type: 'string' },
+		name: { type: 'string' },
 		description: { type: 'string' },
 		interval: { type: 'number' },
 		lastDrawingTime: { type: 'string', format: 'date-time' },
