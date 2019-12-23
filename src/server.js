@@ -2,6 +2,10 @@ import fastify from 'fastify';
 import fastifyMongodb from 'fastify-mongodb';
 import gamesRoutes from './routes/games';
 import drawingsRoutes from './routes/drawings';
+import timers from './plugins/timers';
+import executor from './plugins/executor';
+import startGames from './plugins/startGames';
+import config from './config';
 
 const app = fastify({
 	logger: true,
@@ -10,8 +14,12 @@ const app = fastify({
 
 app.register(fastifyMongodb, {
 	forceClose: true,
-	url: 'mongodb://localhost:27017/test'
+	url: config.MONGODB_URL
 });
+
+app.register(timers);
+app.register(executor);
+app.register(startGames);
 
 app.register(gamesRoutes, { prefix: '/games' });
 app.register(drawingsRoutes, { prefix: '/drawings' });

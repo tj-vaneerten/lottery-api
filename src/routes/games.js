@@ -112,6 +112,11 @@ export default (fastify, opts, done) => {
 				if (key === '_id')
 					return 'id';
 			});
+			this.timers.start(game.id, () => {
+				this.executor.execute(game);
+			}, {
+				interval: game.interval
+			});
 			reply.code(201).send(game);
 		})
 		.catch(error => {

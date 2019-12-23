@@ -16,6 +16,10 @@ startApp({
 	tap.error(err);
 	
 	tap.beforeEach(() => clean(app.mongo.db));
+	tap.afterEach(done => {
+		app.timers.stopAll();
+		done();
+	});
 	tap.tearDown(() => app.close());
 
 // --------------------------------------------------
@@ -80,6 +84,8 @@ startApp({
 
 	tap.test('POST /games', t => {
 
+		let postId;
+
 		Promise.all([
 
 			// insert valid game
@@ -97,6 +103,7 @@ startApp({
 				t.strictEqual(response.statusCode, 201);
 				const body = JSON.parse(response.body);
 				t.match(body, gamePattern);
+				postId = body.id;
 			}),
 
 			// insert game without id
@@ -165,6 +172,10 @@ startApp({
 			.then(response => {
 				const body = JSON.parse(response.body);
 				t.strictEqual(body.length, 1);
+
+				// also make sure only one game timer is running
+				const timers = app.timers.list();
+				t.strictEqual(timers.length, 1);
 			});
 		})
 		.catch(error => t.error(error))

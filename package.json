@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tap",
-    "dev": "nodemon --exec babel-node ./src/server",
+    "test": "cross-env NODE_ENV=test tap",
+    "dev": "cross-env NODE_ENV=dev nodemon --exec babel-node ./src/server",
     "build": "babel src --out-dir dist",
     "serve": "node ./dist/server",
     "start": "npm-run-all build serve"
@@ -26,6 +26,7 @@
     "@babel/core": "^7.7.5",
     "@babel/node": "^7.7.4",
     "@babel/preset-env": "^7.7.6",
+    "cross-env": "^6.0.3",
     "mongo-clean": "^2.0.0",
     "nodemon": "^2.0.2",
     "tap": "^14.10.1"
@@ -33,6 +34,8 @@
   "dependencies": {
     "fastify": "^2.11.0",
     "fastify-mongodb": "^2.0.0",
+    "fastify-plugin": "^1.6.0",
+    "moment": "^2.24.0",
     "rename-keys": "^2.0.1"
   }
 }
